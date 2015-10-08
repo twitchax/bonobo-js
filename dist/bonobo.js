@@ -28,24 +28,8 @@
 
     _.noOp = function() {};
     
-    _.buildArgs = function(method, data, transfer) {
+    _.buildArgs = function(method, data) {
         var args = [{ method: method, userData: data }];
-        var construct = _.getConstructorName(data);
-        if (transfer || construct === 'Object' || construct === 'Array' || construct === 'String' || construct === 'ArrayBuffer') {
-            switch (construct) {
-                case 'Object':
-                case 'Array':
-                    data = _.stringToArrayBuffer(JSON.stringify(data));
-                    args[0].transferred = construct;
-                    break;
-                case 'String':
-                    data = _.stringToArrayBuffer(data);
-                    args[0].transferred = construct;
-                    break;
-            }
-            args[0].userData = data;
-            args.push([data]);
-        }
         return args;
     };
 
