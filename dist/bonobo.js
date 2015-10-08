@@ -10,30 +10,30 @@
     
     'use strict';
 
-    var _ = {},
-        _bonobo, Employee, Promise,
-        _employees = {};
+    var _internal_ = {},
+        _internal_bonobo, Employee, Promise,
+        _internal_employees = {};
 
     var slice = Array.prototype.slice;
 
-    _.isDefined = function(o) {
+    _internal_.isDefined = function(o) {
         return typeof o !== 'undefined';
     };
 
-    _.isImported = (function() {
-        return !_.isDefined(s.document);
+    _internal_.isImported = (function() {
+        return !_internal_.isDefined(s.document);
     })();
 
-    _.isSupported = true;
+    _internal_.isSupported = true;
 
-    _.noOp = function() {};
+    _internal_.noOp = function() {};
     
-    _.buildArgs = function(method, data) {
+    _internal_.buildArgs = function(method, data) {
         var args = [{ method: method, userData: data }];
         return args;
     };
 
-    _.stringToArrayBuffer = function(str) {
+    _internal_.stringToArrayBuffer = function(str) {
         var buffer = new ArrayBuffer(str.length * 2);
         var bufferView = new Uint16Array(buffer);
         for (var i = 0, strLen = str.length; i < strLen; i++) {
@@ -42,7 +42,7 @@
         return buffer;
     };
 
-    _.arrayBufferToString = function(buffer) {
+    _internal_.arrayBufferToString = function(buffer) {
         var str = '';
         var bytes = new Uint16Array(buffer);
         for (var i = 0, buffLen = (bytes.byteLength / 2); i < buffLen; i++) {
@@ -51,32 +51,32 @@
         return str;
     };
 
-    _.getConstructorName = function(o) {
+    _internal_.getConstructorName = function(o) {
         return Object.prototype.toString.call(o).match(/\[object (\w*)\]/)[1];
     };
 
-    _.getFunctionName = function(str) {
+    _internal_.getFunctionName = function(str) {
         return str.match(/function (\w*)/)[1];
     };
 
     var d = document, w = window;
 
-    _bonobo = function(ref) {
+    _internal_bonobo = function(ref) {
         if (typeof ref === 'undefined') throw '[Bonobo] Your employee needs a reference.';
-        return (ref in _employees) ? _employees[ref] : new Employee(ref);
+        return (ref in _internal_employees) ? _internal_employees[ref] : new Employee(ref);
     };
 
-    _.isSupported = (function() {
+    _internal_.isSupported = (function() {
         return 'Worker' in w &&
             'Blob' in w &&
             ('webkitURL' in w || 'URL' in w) &&
             !!(function() {
                 try {
-                    _.blobURL = w.URL || w.webkitURL;
-                    var test = _.blobURL.createObjectURL(new Blob([';'], { type: 'text/javascript' }));
+                    _internal_.blobURL = w.URL || w.webkitURL;
+                    var test = _internal_.blobURL.createObjectURL(new Blob([';'], { type: 'text/javascript' }));
                     var wrk = new Worker(test);
                     wrk.terminate();
-                    _.blobURL.revokeObjectURL(test);
+                    _internal_.blobURL.revokeObjectURL(test);
                     return true;
                 } catch (e) {
                     return false;
@@ -84,8 +84,8 @@
             })();
     })();
 
-    if (_.isSupported) {
-        _.location = (function() {
+    if (_internal_.isSupported) {
+        _internal_.location = (function() {
             function cleanPathName() {
                 var path = d.location.pathname.replace(/\/(?:.(?!\/))+\.(html?|php|do)$/g, '');
                 path = path.slice(-1) === '/' ? path : path + '/';
@@ -95,17 +95,17 @@
             return d.location.protocol + '//' + d.location.hostname + (d.location.port ? ':' + d.location.port : '') + cleanPathName();
         })();
     } else {
-        _.removeScripts = function(ref) {
+        _internal_.removeScripts = function(ref) {
             var el = d.querySelectorAll('[rel='+ref+']');
             for (var i = 0; i < el.length; i++) {
                 el[i].parentNode.removeChild(el[i]);
             }
         };
 
-        _.loadScripts = function() {
-            var _this = this;
+        _internal_.loadScripts = function() {
+            var _internal_this = this;
             var args = slice.call(arguments);
-            var _prm = new Promise().bind(_this);
+            var _internal_prm = new Promise().bind(_internal_this);
 
             function source(src) {
                 var scripts = d.getElementsByTagName('script');
@@ -119,11 +119,11 @@
             }
 
             function script(s) {
-                var _promise = new Promise();
+                var _internal_promise = new Promise();
                 var src = s;
                 if (source(s.src)) {
-                    setTimeout(_promise.resolve, 0);
-                    return _promise;
+                    setTimeout(_internal_promise.resolve, 0);
+                    return _internal_promise;
                 }
                 var p = d.getElementsByTagName('script')[0];
                 var f = d.createElement('script');
@@ -134,61 +134,61 @@
                     if ( !done && (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') )
                     {
                         done = true;
-                        setTimeout(_promise.resolve, 0);
+                        setTimeout(_internal_promise.resolve, 0);
                         f.onload = f.onreadystatechange = null;
                     }
                 };
                 p.parentNode.insertBefore(f, p);
-                f.setAttribute('rel', _this.ref);
-                return _promise;
+                f.setAttribute('rel', _internal_this.ref);
+                return _internal_promise;
             }
 
             function loop() {
                 if (args.length) {
                     script(args.shift()).then(loop);
                 } else {
-                    _prm.resolve();
+                    _internal_prm.resolve();
                 }
             }
 
             loop();
 
-            return _prm;
+            return _internal_prm;
         };
     }
 
     Promise = function() {
-        var _self = this;
-        _self.scope = _self;
-        _self.stack = [];
-        _self.resolve = function(r) {
-            while (_self.stack.length) {
-                return _self.stack.shift().call(_self.scope, r);
+        var _internal_self = this;
+        _internal_self.scope = _internal_self;
+        _internal_self.stack = [];
+        _internal_self.resolve = function(r) {
+            while (_internal_self.stack.length) {
+                return _internal_self.stack.shift().call(_internal_self.scope, r);
             }
         };
-        _self.bind = function(scope) {
-            _self.scope = scope;
-            return _self;
+        _internal_self.bind = function(scope) {
+            _internal_self.scope = scope;
+            return _internal_self;
         };
-        _self.then = function(s,e) {
-            _self.stack.push(s);
-            return _self;
+        _internal_self.then = function(s,e) {
+            _internal_self.stack.push(s);
+            return _internal_self;
         };
     };
 
     Employee = function(ref) {
-        var _self = this;
-        _self.ref = ref;
-        _self.scripts = [];
-        _self.methods = {};
-        _self.scope = '';
-        _self.blob = undefined;
-        _self.worker = undefined;
-        _self.fallback = _.noOp;
-        _self.doneHandler = _.noOp;
-        _self.errorHandler = _.noOp;
-        _self.userHandlers = {};
-        _self.messageHandler = function(e) {
+        var _internal_self = this;
+        _internal_self.ref = ref;
+        _internal_self.scripts = [];
+        _internal_self.methods = {};
+        _internal_self.scope = '';
+        _internal_self.blob = undefined;
+        _internal_self.worker = undefined;
+        _internal_self.fallback = _internal_.noOp;
+        _internal_self.doneHandler = _internal_.noOp;
+        _internal_self.errorHandler = _internal_.noOp;
+        _internal_self.userHandlers = {};
+        _internal_self.messageHandler = function(e) {
 
             function getData(response) {
                 var data = response.userData;
@@ -196,10 +196,10 @@
                     switch (response.transferred) {
                         case 'Object':
                         case 'Array':
-                            data = JSON.parse(_.arrayBufferToString(data));
+                            data = JSON.parse(_internal_.arrayBufferToString(data));
                             break;
                         case 'String':
-                            data = _.arrayBufferToString(data);
+                            data = _internal_.arrayBufferToString(data);
                             break;
                     }
                 }
@@ -207,21 +207,21 @@
             }
 
             if (e.type === 'error') {
-                _self.errorHandler.call(_self, e.message);
-            } else if (_self.userHandlers.hasOwnProperty(e.data.method)) {
-                _self.userHandlers[e.data.method].call(_self, getData(e.data));
+                _internal_self.errorHandler.call(_internal_self, e.message);
+            } else if (_internal_self.userHandlers.hasOwnProperty(e.data.method)) {
+                _internal_self.userHandlers[e.data.method].call(_internal_self, getData(e.data));
             } else {
                 switch (e.data.method) {
                     case 'log':
-                        Function.prototype.apply.call(s.console.log, s.console, ['[Bonobo(\''+_self.ref+'\') : LOG]:'].concat(getData(e.data)));
+                        Function.prototype.apply.call(s.console.log, s.console, ['[Bonobo(\''+_internal_self.ref+'\') : LOG]:'].concat(getData(e.data)));
                     break;
                     case 'response':
-                        _self.doneHandler.call(_self, getData(e.data));
+                        _internal_self.doneHandler.call(_internal_self, getData(e.data));
                     break;
                 }
             }
         };
-        _employees[ref] = _self;
+        _internal_employees[ref] = _internal_self;
     };
 
     Employee.prototype = {
@@ -239,9 +239,9 @@
         },
         require : function() {
             var args = slice.call(arguments);
-            if (_.isSupported) {
+            if (_internal_.isSupported) {
                 this.scripts = this.scripts.concat(args.map(function(scr) {
-                    return scr.indexOf('http') > -1 ? scr : scr.slice(0, 1) === '/' ? _.location + scr.slice(1) : _.location + scr;
+                    return scr.indexOf('http') > -1 ? scr : scr.slice(0, 1) === '/' ? _internal_.location + scr.slice(1) : _internal_.location + scr;
                 }));
             } else {
                 this.scripts = args;
@@ -249,23 +249,23 @@
             return this;
         },
         define : function(method, fn) {
-            var _this = this;
+            var _internal_this = this;
             if (!fn) {
                 fn = method;
-                method = _.getFunctionName(fn.toString());
+                method = _internal_.getFunctionName(fn.toString());
                 if (method === '') throw '[Bonobo] Please define a function using a named function OR a string and function.';
-                if (method in _this) throw '[Bonobo] \'' + method + '\' is reserved or already defined, please use something else.';
+                if (method in _internal_this) throw '[Bonobo] \'' + method + '\' is reserved or already defined, please use something else.';
             }
-            _this.methods[method] = fn;
-            _this[method] = function(data, transfer) {
-                _this.run(method, data, transfer);
+            _internal_this.methods[method] = fn;
+            _internal_this[method] = function(data, transfer) {
+                _internal_this.run(method, data, transfer);
             };
-            return _this;
+            return _internal_this;
         },
         run : function(method, data, transfer) {
-            if (_.isDefined(this.worker)) {
-                if (_.isSupported) {
-                    this.worker.postMessage.apply(this.worker, _.buildArgs(method, data, transfer));
+            if (_internal_.isDefined(this.worker)) {
+                if (_internal_.isSupported) {
+                    this.worker.postMessage.apply(this.worker, _internal_.buildArgs(method, data, transfer));
                 } else {
                     this.worker[method](data);
                 }
@@ -286,60 +286,60 @@
             return this;
         },
         stop : function() {
-            if (_.isDefined(this.worker) && _.isSupported) {
+            if (_internal_.isDefined(this.worker) && _internal_.isSupported) {
                 this.worker.terminate();
             }
             return this;
         },
         destroy : function() {
             this.blob = undefined;
-            if (_.isDefined(this.worker)) {
-                if (_.isSupported) {
+            if (_internal_.isDefined(this.worker)) {
+                if (_internal_.isSupported) {
                     this.worker.terminate();
-                    _.blobURL.revokeObjectURL(this.blobURL);
+                    _internal_.blobURL.revokeObjectURL(this.blobURL);
                 } else {
-                    _.removeScripts(this.ref);
+                    _internal_.removeScripts(this.ref);
                 }
             }
             this.worker = undefined;
-            delete _employees[this.ref];
+            delete _internal_employees[this.ref];
         },
         build : function() {
             var workerFn = {
                 done : function(data, transfer) {
-                    self.postMessage.apply(self, _.buildArgs('response', data, transfer));
+                    self.postMessage.apply(self, _internal_.buildArgs('response', data, transfer));
                 },
                 emit : function(ev, data, transfer) {
-                    self.postMessage.apply(self, _.buildArgs(ev, data, transfer));
+                    self.postMessage.apply(self, _internal_.buildArgs(ev, data, transfer));
                 },
                 log : function() {
-                    self.postMessage.apply(self, _.buildArgs('log', slice.call(arguments)));
+                    self.postMessage.apply(self, _internal_.buildArgs('log', slice.call(arguments)));
                 },
                 error : function() {
-                    self.postMessage.apply(self, _.buildArgs('error', slice.call(arguments)));
+                    self.postMessage.apply(self, _internal_.buildArgs('error', slice.call(arguments)));
                 },
                 importJS : function() {
                     self.importScripts.apply(self, slice.call(arguments).map(function(scr) {
-                        return scr.indexOf('http') > -1 ? scr : scr.slice(0, 1) === '/' ? _.location + scr.slice(1) : _.location + scr;
+                        return scr.indexOf('http') > -1 ? scr : scr.slice(0, 1) === '/' ? _internal_.location + scr.slice(1) : _internal_.location + scr;
                     }));
                 },
                 stop : function() {
                     self.close();
                 }
             };
-            var build, _promise = new Promise().bind(this);
-            if (_.isSupported) {
+            var build, _internal_promise = new Promise().bind(this);
+            if (_internal_.isSupported) {
                 build = [
                     this.scripts.length ? 'importScripts(\'' + this.scripts.join('\',\'') + '\');' : '',
                     'var slice = Array.prototype.slice;',
-                    'var _ = {',
+                    'var _internal_ = {',
                     [
                         'buildArgs',
                         'arrayBufferToString',
                         'stringToArrayBuffer',
                         'getConstructorName'
                     ].map(function(fn) {
-                        return fn + ': ' + _[fn].toString() + ',';
+                        return fn + ': ' + _internal_[fn].toString() + ',';
                     }).join('\n').slice(0, -1),
                     '};',
                     'var Bonobo = {',
@@ -355,10 +355,10 @@
                             'switch(e.data.transferred) {',
                                 'case \'Object\':',
                                 'case \'Array\':',
-                                    'data = JSON.parse(_.arrayBufferToString(data));',
+                                    'data = JSON.parse(_internal_.arrayBufferToString(data));',
                                     'break;',
                                 'case \'String\':',
-                                    'data = _.arrayBufferToString(data);',
+                                    'data = _internal_.arrayBufferToString(data);',
                                     'break;',
                             '}',
                         '}',
@@ -374,64 +374,64 @@
                     '}'
                 ];
                 this.blob = new Blob([ build.join('\n') ], { type : 'text/javascript' });
-                this.blobURL = _.blobURL.createObjectURL(this.blob);
+                this.blobURL = _internal_.blobURL.createObjectURL(this.blob);
                 this.worker = new Worker(this.blobURL);
                 this.worker.onmessage = this.messageHandler;
                 this.worker.onerror = this.messageHandler;
-                setTimeout(_promise.resolve, 0);
+                setTimeout(_internal_promise.resolve, 0);
             } else {
-                var _self = this;
+                var _internal_self = this;
                 var fn = {
                     done : function(data) {
-                        _self.doneHandler.call(_self, data);
+                        _internal_self.doneHandler.call(_internal_self, data);
                     },
                     emit : function(ev, data) {
-                        if (_self.userHandlers.hasOwnProperty(ev)) _self.userHandlers[ev].call(_self, data);
+                        if (_internal_self.userHandlers.hasOwnProperty(ev)) _internal_self.userHandlers[ev].call(_internal_self, data);
                     },
                     log : function() {
-                        Function.prototype.apply.call(s.console.log, s.console, ['[Bonobo(\''+_self.ref+'\') : LOG]:'].concat(slice.call(arguments)));
+                        Function.prototype.apply.call(s.console.log, s.console, ['[Bonobo(\''+_internal_self.ref+'\') : LOG]:'].concat(slice.call(arguments)));
                     },
                     error : function(data) {
-                        _self.errorHandler.call(_self, data);
+                        _internal_self.errorHandler.call(_internal_self, data);
                     },
                     importJS: function() {
-                        return _.loadScripts.apply(_self, slice.call(arguments));
+                        return _internal_.loadScripts.apply(_internal_self, slice.call(arguments));
                     },
                     stop : function() {
-                        _self.stop();
+                        _internal_self.stop();
                     }
                 };
-                _.loadScripts.apply(_self, _self.scripts).then(function() {
+                _internal_.loadScripts.apply(_internal_self, _internal_self.scripts).then(function() {
                     var m, handleScripts = function(match, args, rest) {
-                        return '_scope.importJS(' + args + ').then(function() {' + rest + '); };';
+                        return '_internal_scope.importJS(' + args + ').then(function() {' + rest + '); };';
                     };
                     build = [
-                        'var _scope = this;',
-                        _self.scope
+                        'var _internal_scope = this;',
+                        _internal_self.scope
                     ];
-                    for (m in _self.methods) {
-                        build.push('var ' + m + ' = ' + _self.methods[m].toString()
-                            .replace(/Bonobo|bN|console/g, '_scope')
-                            .replace(/(?:_scope.importJS|importScripts)+\(([^\)]+)\);?([^]*)/g, handleScripts)
+                    for (m in _internal_self.methods) {
+                        build.push('var ' + m + ' = ' + _internal_self.methods[m].toString()
+                            .replace(/Bonobo|bN|console/g, '_internal_scope')
+                            .replace(/(?:_internal_scope.importJS|importScripts)+\(([^\)]+)\);?([^]*)/g, handleScripts)
                         );
                     }
                     build.push('return {');
-                    for (m in _self.methods) {
+                    for (m in _internal_self.methods) {
                         build.push(m + ' : ' + m + ',');
                     }
                     build[build.length - 1] = build[build.length - 1].slice(0,-1);
                     build.push('}');
-                    _self.worker = new Function(build.join('\n')).call(fn);
-                    setTimeout(_promise.resolve, 0);
+                    _internal_self.worker = new Function(build.join('\n')).call(fn);
+                    setTimeout(_internal_promise.resolve, 0);
                 });
             }
-            return _promise;
+            return _internal_promise;
         },
         compile : function() {
             return this.build();
         }
     };
 
-    return _bonobo;
+    return _internal_bonobo;
 
 });
